@@ -6,14 +6,19 @@ body {
   align-items: center;
   justify-content: center;
 }
+.flex-container {
+  display: flex;
+  justify-content: space-between; 
+  margin: 20px 0;
+}
 
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
   text-align: center;
+  padding-right: 9rem;
 }
 
 .slotcontainer {
@@ -93,3 +98,9 @@ button {
   border-radius: 5px;
   margin-left: 10px;
 }
+
+.scrollable-list {
+  max-height: 300px; 
+  overflow-y: auto;
+}
+

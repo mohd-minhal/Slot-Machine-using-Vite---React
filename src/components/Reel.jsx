@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import PropTypes from 'prop-types';
 
 const symbolFrequencies = {
   "🍒": 5,
@@ -20,10 +21,11 @@ const symbolValues = {
 
 const transitionDelay = 300;
 
-const SlotMachine = () => {
+const SlotMachine = ({ onPayoutChange }) => {
   const [spun, setSpun] = useState(false);
   const [spinAmount, setSpinAmount] = useState("");
   const slotsRef = useRef([]);
+  const [isAutoSpinning, setIsAutoSpinning] = useState(false);
 
   useEffect(() => {
     generate();
@@ -105,6 +107,7 @@ const SlotMachine = () => {
   const autoSpin = async () => {
     const amount = parseInt(spinAmount, 10);
     if (amount) {
+      setIsAutoSpinning(true);
       setSpun(false);
       for (let i = 0; i < amount; i++) {
         await spin();
@@ -112,10 +115,12 @@ const SlotMachine = () => {
           setTimeout(resolve, transitionDelay * slotsRef.current.length)
         );
       }
+      setIsAutoSpinning(false); // Reset after completing auto spins
     } else {
       alert("Please enter a valid number");
     }
   };
+  
 
   const checkWin = () => {
     const displayedSymbols = [[], [], []];
@@ -132,13 +137,22 @@ const SlotMachine = () => {
       displayedSymbols[2][1],
     ];
 
+    let payout = 0;
+
     if (middleRowSymbols.every((symbol) => symbol === "⭐")) {
-      // Jackpot win
-    } else if (middleRowSymbols.every((symbol) => symbol === middleRowSymbols[0])) {
+      payout = 500;
+      alert("Jackpot! Payout: 500");
+    } else if (
+      middleRowSymbols.every((symbol) => symbol === middleRowSymbols[0])
+    ) {
       const winningSymbol = middleRowSymbols[0];
       const symbolValue = symbolValues[winningSymbol];
-      const payout = symbolValue;
+      payout = symbolValue;
+    } else {
+      payout = 0;
     }
+
+    onPayoutChange(payout);
   };
 
   return (
@@ -158,7 +172,7 @@ const SlotMachine = () => {
           </div>
         ))}
         <div className="controls">
-          <button onClick={spin}>Spin</button>
+          <button onClick={spin}>Spin <small>1$</small></button>
           <button onClick={reset}>Reset</button>
           <hr className="divider-hr" />
           <input
@@ -168,11 +182,16 @@ const SlotMachine = () => {
             onChange={(e) => setSpinAmount(e.target.value)}
             placeholder="e.g. 25"
           />
-          <button onClick={autoSpin}>Auto</button>
+          <button onClick={autoSpin} disabled={isAutoSpinning}>Auto <small>10% less</small></button>
         </div>
       </div>
     </div>
   );
+};
+
+
+SlotMachine.propTypes = {
+  onPayoutChange: PropTypes.func.isRequired,
 };
 
 export default SlotMachine;
